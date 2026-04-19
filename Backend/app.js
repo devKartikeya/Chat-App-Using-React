@@ -7,7 +7,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// ✅ Required for Render (health check / wake-up route)
 app.get('/', (req, res) => {
     res.send('WebSocket server is running 🚀');
 });
@@ -29,14 +28,12 @@ wss.on('connection', (ws) => {
     ws.on('message', (data) => {
         try {
             const message = JSON.parse(data.toString());
-            console.log('Received:', message);
 
-            // 👤 User joins
             if (message.type === 'join') {
                 clients.set(ws, message.username);
 
                 wss.clients.forEach(client => {
-                    if (client.readyState === 1) {
+                    if (client.readyState === 1 && client !== ws) {
                         client.send(JSON.stringify({
                             type: 'join',
                             message: 'joined the chat!',
@@ -47,10 +44,9 @@ wss.on('connection', (ws) => {
                 return;
             }
 
-            // 💬 Message broadcast
             if (message.type === 'message') {
                 wss.clients.forEach(client => {
-                    if (client.readyState === 1) {
+                    if (client.readyState === 1 && client !== ws) {
                         client.send(JSON.stringify({
                             type: 'message',
                             message: message.message,
@@ -68,15 +64,13 @@ wss.on('connection', (ws) => {
         }
     });
 
-    // ❌ Client disconnect
     ws.on('close', () => {
         console.log('Client disconnected');
         clients.delete(ws);
     });
 });
 
-// 💓 Keep connection alive (important for Render)
-const interval = setInterval(() => {
+setInterval(() => {
     wss.clients.forEach(ws => {
         if (!ws.isAlive) return ws.terminate();
 
@@ -85,7 +79,6 @@ const interval = setInterval(() => {
     });
 }, 30000);
 
-// 🔥 Start server
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
