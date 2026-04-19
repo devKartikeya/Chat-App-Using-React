@@ -16,7 +16,7 @@ function App() {
   const username = prompt("Enter your username") || generateRandomUsername();
 
   useEffect(() => {
-    socket.current = new WebSocket("ws://localhost:3000");
+    socket.current = new WebSocket("wss://chat-app-using-react-kwrs.onrender.com");
 
     if (username) {
       socket.current.onopen = () => {
