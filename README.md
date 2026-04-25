@@ -2,6 +2,9 @@
 
 A real-time chat application built using React and WebSockets, featuring dynamic UI updates and component-based architecture.
 
+EDIT : I have also hosted this Project on Vercel ( Frontend) and Render ( Backend ). 
+
+URL : https://chat-app-using-react-ebon.vercel.app
 
 ---
 
