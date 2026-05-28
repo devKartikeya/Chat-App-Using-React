@@ -5,7 +5,6 @@ function App() {
   const socket = useRef(null);
   const [messages, setMessages] = useState([]);
 
-  // ✅ Fix: username should not change on re-render
   const usernameRef = useRef(null);
 
   function generateRandomUsername() {
@@ -37,17 +36,9 @@ function App() {
     socket.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
 
-      // ✅ Ignore your own messages
       if (message.username === username) return;
 
-      if (message.type === 'message') {
-        setMessages(prev => [
-          ...prev,
-          { text: `${message.username}: ${message.message}`, isSent: false }
-        ]);
-      }
-
-      if (message.type === 'join') {
+      if (message.type === 'message' || message.type === 'join') {
         setMessages(prev => [
           ...prev,
           { text: `${message.username}: ${message.message}`, isSent: false }
@@ -73,7 +64,6 @@ function App() {
       username
     }));
 
-    // ✅ Show instantly (no wait for server)
     setMessages(prev => [
       ...prev,
       { text: `You: ${value}`, isSent: true }
@@ -83,28 +73,39 @@ function App() {
   }
 
   return (
-    <div className='w-screen h-screen flex justify-center items-center bg-gradient-to-r from-purple-900 via-indigo-800 to-blue-900 p-2 sm:p-4'>
+    <div className='w-screen h-screen flex justify-center items-center bg-black text-white p-2 sm:p-4'>
 
-      <div className='w-full h-full sm:h-[90%] sm:max-w-md md:max-w-lg lg:max-w-xl bg-gray-900 rounded-2xl sm:rounded-3xl flex flex-col p-3 sm:p-4 shadow-2xl'>
+      <div className='relative w-full h-full sm:h-[90%] sm:max-w-md md:max-w-lg lg:max-w-xl 
+                      bg-gradient-to-br from-gray-900 via-black to-gray-950 
+                      rounded-2xl sm:rounded-3xl flex flex-col p-3 sm:p-4 
+                      shadow-[0_0_25px_rgba(0,0,0,0.8)] border border-gray-700'>
 
-        <h1 className='text-lg sm:text-2xl text-white font-bold mb-2'>
-          ☁️ WebSocket Chat
+        {/* Glowing C background */}
+        <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+          <span className="text-[10rem] sm:text-[14rem] font-extrabold text-white/10 
+                           drop-shadow-[0_0_25px_rgba(255,255,255,0.6)] select-none">
+            C
+          </span>
+        </div>
+
+        <h1 className='text-lg sm:text-2xl font-bold mb-2 text-white tracking-wide relative z-10'>
+          ⚡Confab - Real-time Chat App
         </h1>
 
         {/* Messages */}
-        <div className='flex-1 p-2 bg-gray-800 w-full rounded-lg overflow-y-auto'>
+        <div className='flex-1 p-2 bg-black/40 backdrop-blur-md w-full rounded-lg overflow-y-auto border border-gray-700 relative z-10'>
           <ul className="w-full flex flex-col gap-2">
             {messages.map((msg, index) => (
               <li
                 key={index}
-                className={`flex ${msg.isSent ? "justify-end" : "justify-start"} font-bold`}
+                className={`flex ${msg.isSent ? "justify-end" : "justify-start"} font-medium`}
               >
                 <span
-                  className={`px-3 py-2 rounded-xl max-w-[75%] sm:max-w-xs break-words text-xs sm:text-sm ${
-                    msg.isSent
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-gray-300 text-black rounded-bl-none"
-                  }`}
+                  className={`px-3 py-2 rounded-xl max-w-[75%] sm:max-w-xs break-words text-xs sm:text-sm shadow-md transition 
+                    ${msg.isSent
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-br-none hover:shadow-blue-500/50"
+                      : "bg-gradient-to-r from-gray-200 to-gray-300 text-black rounded-bl-none hover:shadow-gray-400/50"
+                    }`}
                 >
                   {msg.text}
                 </span>
@@ -114,18 +115,20 @@ function App() {
         </div>
 
         {/* Input */}
-        <div className='w-full mt-2 flex gap-2'>
+        <div className='w-full mt-2 flex gap-2 relative z-10'>
           <input
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()} // ✅ Enter to send
-            className='flex-1 p-2 text-sm sm:text-base rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            className='flex-1 p-2 text-sm sm:text-base rounded-lg bg-black/60 text-white 
+                       placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-700'
             placeholder='Type your message...'
           />
           <button
             onClick={sendMessage}
-            className='px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition'
+            className='px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-indigo-700 
+                       text-white rounded-lg hover:from-blue-700 hover:to-indigo-800 transition shadow-md'
           >
             Send
           </button>
